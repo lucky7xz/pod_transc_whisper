@@ -66,10 +66,10 @@ def check_SR_and_duration(folder_name):
         print("\n Not all files have the same sample rate")
         print("This might not be a problem, but it is worth checking")
 
-        sr_ret = "variable"
+        sr_ret = -1
     else:
         print("\n All files have the same sample rate")
-        sr_ret = str(sr_checker)
+        sr_ret = sr_checker
 
     avg_duration = round((sum(duration_of_test_picks)/len(duration_of_test_picks)) / 60, 2) 
 
@@ -154,7 +154,7 @@ def init_log_file(folder_name, file_name,model_type):
 
   
 
-def update_file_log(folder_name, file_name, transc_time):
+def update_log_file(folder_name, file_name, transc_time):
 
     with open("transcription_log.json", "r") as f:
         log = json.load(f)
