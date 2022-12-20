@@ -105,7 +105,7 @@ def init_folder_log(folder_name,ep_count,aprox_duration_min, SR):
                         # split_done might be used later in conjunction witl nemo drill
 
                         "transc_done":False,
-                        "split_done":False}
+                        "split_done":"Whispered"}
 
     with open("transcription_log.json", "w") as f:
         json.dump(log, f, indent=4, sort_keys=True)
@@ -122,26 +122,45 @@ def update_folder_log_transc_done(folder_name,transc_done=True):
     log[folder_name]["trans_time_sec"] = round(sum([key["transc_time"] for key in log[folder_name]["files"].keys()]),2)
 
 
-
-# aprx len, format, sr 
-
-'''
-
-log[folder_name]["aprox_folder_duration_min"] = aprox_duration
-log[folder_name]["sample_rate"] = sr
-log[folder_name]["num_files"] = num_files
-log[folder_name]["transc_done"] = transc_done
+    with open("transcription_log.json", "w") as f:
+        json.dump(log, f, indent=4, sort_keys=True)
 
 
-log[folder_name][file][title] = 
-log[folder_name][file] =
 
-'''
+def init_log_file(folder_name, file_name,model_type):
+
+    '''
+    Init a file log entry with the following:
+    
+    title: ""
+    transc_type: model_type
+    transc_time: ""
+    transc_done: False
+    split_done: Whispered
+    
+    '''
+    with open("transcription_log.json", "r") as f:
+        log = json.load(f)
+
+    log[folder_name]["files"][file_name] = {"transc_time":"",
+                                            "transc_done":False,
+                                            "split_done":"Whispered",
+                                            "transc_type":model_type,
+                                            "title": ""}
 
 
-def update_file_log(folder_name, file_name):
+    with open("transcription_log.json", "w") as f:
+        json.dump(log, f, indent=4, sort_keys=True)
+
+  
+
+def update_file_log(folder_name, file_name, transc_time):
 
     with open("transcription_log.json", "r") as f:
         log = json.load(f)
 
-    log[folder
+    log[folder_name]["files"][file_name]["transc_time"] = transc_time
+    log[folder_name]["files"][file_name]["transc_done"] = True
+
+    with open("transcription_log.json", "w") as f:
+        json.dump(log, f, indent=4, sort_keys=True)
