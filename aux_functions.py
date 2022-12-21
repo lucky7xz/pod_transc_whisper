@@ -183,6 +183,7 @@ def update_file_in_log(folder_name, file_name, transc_time, model_type):
 
 
 # Run MODEL def with specific config ?
+# SWEETSPOT FOR USECASE : Small.en @ https://arxiv.org/pdf/2212.04356.pdf ->> appx D
 
 def init_model(model_type):
 

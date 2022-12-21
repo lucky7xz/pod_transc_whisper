@@ -5,9 +5,15 @@ from aux_functions import init_folder_log, update_folder_log
 
 from transcribe_folder import transcribe_folder
 import time
+import json
 
-# aprox_avg_ep_duration !!
-# transc type update when winished, not init!!
+'''
+  File "/home/lucky/Documents/scripts/ReCAP/pod_transc_whisper/main.py", line 52, in <module>
+    if log[folder_name]["transc_done"] == False:
+KeyError: 'lex_fridman_podcast'
+
+start again and it should work ?...
+'''
 
 # ---- Select the model to use !!! ---
 
@@ -45,7 +51,9 @@ else:
             init_folder_log(folder_name)
             print(f" --------- Folder {folder_name} init in log file.[+] --------- ")
 
-    
+            # reload log # ---
+            with open("transcription_log.json", "r") as f:
+                log = json.load(f) # to fix KeyError: 'lex_fridman_podcast'
     iteration_list = []
 
     for folder_name in folder_names:
