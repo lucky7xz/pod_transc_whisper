@@ -4,8 +4,10 @@ from aux_functions import check_log_and_podcast_folder_file
 from aux_functions import init_folder_log, update_folder_log
 
 from transcribe_folder import transcribe_folder
-import time,os
+import time
 
+# aprox_avg_ep_duration !!
+# transc type update when winished, not init!!
 
 # ---- Select the model to use !!! ---
 
@@ -33,6 +35,8 @@ if not log:
 
 # if log is not empty, check which folders are done and create iteration list
 else:
+
+    
 
     # but first update the log with the new folders
     for folder_name in folder_names:

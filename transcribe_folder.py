@@ -33,12 +33,12 @@ def transcribe_folder(folder_name, model_type):
         for audio_file in audio_files:
             file_name = os.path.basename(audio_file)
 
-            init_file_in_log(folder_name, file_name, model_type)
+            init_file_in_log(folder_name, file_name)
         
         iteration_path_list = audio_files
     
         destination_folder = folder_name+"_text"
-        os.makedirs(destination_folder)
+        os.makedirs(destination_folder, exist_ok=True)
     
     # if log[folder_name]["files"] is not empty, check which files are done and create iteration list
     else:
@@ -73,7 +73,7 @@ def transcribe_folder(folder_name, model_type):
 
         transc_path = os.path.join(destination_folder, file_name).replace(ext, '.txt')
 
-        transc_time = time.time() - start_time
+        transc_time = round(time.time() - start_time,2)
         print(f"Transcription of {file_path} done in {transc_time} seconds.")
 
         with open(transc_path, 'w') as f:
@@ -81,7 +81,7 @@ def transcribe_folder(folder_name, model_type):
         print(f"Transcription saved to {transc_path}.")
         
         #update log
-        update_file_in_log(folder_name, file_name, transc_time)
+        update_file_in_log(folder_name, file_name, transc_time, model_type)
       
         
         print(f"Transcription log updated for {file_path}. Progress : {count} / {iteration_list_length}\n")
