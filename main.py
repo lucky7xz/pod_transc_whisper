@@ -43,7 +43,7 @@ else:
         
         if folder_name not in log.keys():
             init_folder_log(folder_name)
-            print(f"Folder {folder_name} init in log file.")
+            print(f" --------- Folder {folder_name} init in log file.[+] --------- ")
 
     
     iteration_list = []

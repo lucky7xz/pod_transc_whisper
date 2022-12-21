@@ -134,8 +134,8 @@ def update_folder_log(folder_name):
         log = json.load(f)
 
     log[folder_name]["transc_done"] = True
-    log[folder_name]["trans_time_sec"] = round(sum([key["transc_time_sec"] for key in log[folder_name]["files"].keys()]),2) #***
 
+    log[folder_name]["trans_time_sec"] = round(sum([log[folder_name]["files"][key]["transc_time_sec"] for key in log[folder_name]["files"].keys()]),2) #***
 
     with open("transcription_log.json", "w") as f:
         json.dump(log, f, indent=4, sort_keys=True)
