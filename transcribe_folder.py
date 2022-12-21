@@ -1,52 +1,12 @@
 import glob
 import os
 import json
-
 import time
-import librosa
 
-import whisper
+from aux_functions import init_file_in_log, update_file_in_log
+from aux_functions import init_model
 
-from aux_functions import init_log_file, update_log_file
-
-'''
-use tiny model for testing (alos check what has to be done to use gpu instead of cpu, and also if cuda is needed)
-
-
-init log file if needed
-read in podcast folder names
-
-use these to generate iter paths
-
-
-make new folers
-transcribe
-update logs
-tqdm maybe
-
-'''
-
-
-# Run MODEL def with specific config ?
-
-def init_model(model_type):
-
-
-    if model_type == "tiny":
-        model = whisper.load_model("tiny")
-
-    elif model_type == "base":
-        model = model = whisper.load_model("base")
-
-    elif model_type == "medium":
-        model = model = whisper.load_model("medium")
-    
-    else:
-        raise ValueError("model_type must be 'tiny' or 'base' or medium")
-
-    return model, model_type
-
-def transcribe_folder(folder_name, format, model_type):
+def transcribe_folder(folder_name, model_type):
 
     model, model_type = init_model(model_type)
 
@@ -54,6 +14,7 @@ def transcribe_folder(folder_name, format, model_type):
     with open("transcription_log.json", "r") as f:
         log = json.load(f)
 
+    format = log[folder_name]["format"]
 
     # We know folder_name is in file log and transcription of the overall folder is NOT done
     # Check which files (if any) are already done and create iteration list
@@ -72,7 +33,7 @@ def transcribe_folder(folder_name, format, model_type):
         for audio_file in audio_files:
             file_name = os.path.basename(audio_file)
 
-            init_log_file(folder_name, file_name,model_type)
+            init_file_in_log(folder_name, file_name, model_type)
         
         iteration_path_list = audio_files
     
@@ -120,8 +81,8 @@ def transcribe_folder(folder_name, format, model_type):
         print(f"Transcription saved to {transc_path}.")
         
         #update log
-        update_log_file(folder_name, file_name, transc_time)
+        update_file_in_log(folder_name, file_name, transc_time)
       
         
-        print(f"Transcription log updated for {file_path}.Progress : {count} / {iteration_list_length}\n")
+        print(f"Transcription log updated for {file_path}. Progress : {count} / {iteration_list_length}\n")
         count += 1

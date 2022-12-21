@@ -3,6 +3,7 @@ import os
 import random
 import json
 import librosa
+import whisper
 
 def check_folder_content_and_format(folder_name):
     '''
@@ -37,7 +38,7 @@ def check_folder_content_and_format(folder_name):
 
     else:
         print("\n Folder contains files of different formats. Please check")
-        return False
+        return False, -1
     
 
 def check_SR_and_duration(folder_name):
@@ -71,12 +72,12 @@ def check_SR_and_duration(folder_name):
         print("\n All files have the same sample rate")
         sr_ret = sr_checker
 
-    avg_duration = round((sum(duration_of_test_picks)/len(duration_of_test_picks)) / 60, 2) 
+    aprox_duration_min = round((sum(duration_of_test_picks)/len(duration_of_test_picks)) / 60, 2) 
 
-    return sr_ret, avg_duration
+    return sr_ret, aprox_duration_min
 
 
-def init_folder_log(folder_name,ep_count,aprox_duration_min, SR):
+def init_folder_log(folder_name):
     
     '''
     init a folder log entry with the following:
@@ -92,33 +93,44 @@ def init_folder_log(folder_name,ep_count,aprox_duration_min, SR):
     
     '''
 
+    format, ep_count = check_folder_content_and_format(folder_name)
+
+    if format != False:
+            
+        SR, aprox_duration_min = check_SR_and_duration(folder_name)
+    
+
+        with open("transcription_log.json", "r") as f:
+            log = json.load(f)
+
+        log[folder_name] = {"files":{},
+                            "aprox_folder_duration_min":aprox_duration_min,
+                            "format":format,
+                            "sample_rate":SR,
+                            "ep_count":ep_count,
+
+                            # Default values when init
+                            # split_done might be used later in conjunction witl nemo drill
+
+                            "transc_done":False,
+                            "split_done":"Whispered"}
+
+        with open("transcription_log.json", "w") as f:
+            json.dump(log, f, indent=4, sort_keys=True)
+
+    else:
+        #Raise errror to terminate program
+        raise ValueError(f"Folder {folder_name} not init in log file because of content format error.")
+        
+
+
+def update_folder_log(folder_name):
+
+
     with open("transcription_log.json", "r") as f:
         log = json.load(f)
 
-    log[folder_name] = {"files":{},
-                        "aprox_folder_duration_min":aprox_duration_min,
-                        "format":format,
-                        "sample_rate":SR,
-                        "ep_count":ep_count,
-
-                        # Default values when init
-                        # split_done might be used later in conjunction witl nemo drill
-
-                        "transc_done":False,
-                        "split_done":"Whispered"}
-
-    with open("transcription_log.json", "w") as f:
-        json.dump(log, f, indent=4, sort_keys=True)
-
-
-
-def update_folder_log_transc_done(folder_name,transc_done=True):
-
-
-    with open("transcription_log.json", "r") as f:
-        log = json.load(f)
-
-    log[folder_name]["transc_done"] = transc_done
+    log[folder_name]["transc_done"] = True
     log[folder_name]["trans_time_sec"] = round(sum([key["transc_time"] for key in log[folder_name]["files"].keys()]),2)
 
 
@@ -127,7 +139,7 @@ def update_folder_log_transc_done(folder_name,transc_done=True):
 
 
 
-def init_log_file(folder_name, file_name,model_type):
+def init_file_in_log(folder_name, file_name,model_type):
 
     '''
     Init a file log entry with the following:
@@ -142,7 +154,7 @@ def init_log_file(folder_name, file_name,model_type):
     with open("transcription_log.json", "r") as f:
         log = json.load(f)
 
-    log[folder_name]["files"][file_name] = {"transc_time":"",
+    log[folder_name]["files"][file_name] = {"transc_time_sec":-1,
                                             "transc_done":False,
                                             "split_done":"Whispered",
                                             "transc_type":model_type,
@@ -154,13 +166,74 @@ def init_log_file(folder_name, file_name,model_type):
 
   
 
-def update_log_file(folder_name, file_name, transc_time):
+def update_file_in_log(folder_name, file_name, transc_time):
 
     with open("transcription_log.json", "r") as f:
         log = json.load(f)
 
-    log[folder_name]["files"][file_name]["transc_time"] = transc_time
+    log[folder_name]["files"][file_name]["transc_time_sec"] = transc_time
     log[folder_name]["files"][file_name]["transc_done"] = True
 
     with open("transcription_log.json", "w") as f:
         json.dump(log, f, indent=4, sort_keys=True)
+
+
+# Run MODEL def with specific config ?
+
+def init_model(model_type):
+
+
+    if model_type == "tiny":
+        model = whisper.load_model("tiny")
+
+    elif model_type == "base":
+        model = model = whisper.load_model("base")
+
+    elif model_type == "medium":
+        model = model = whisper.load_model("medium")
+    
+    else:
+        raise ValueError("model_type must be 'tiny' or 'base' or medium")
+
+    return model, model_type
+
+
+
+
+
+def check_log_and_podcast_folder_file():
+
+# ----- Check if podcast_folders.txt exists, if it does, read the file -----
+
+    if os.path.exists('podcast_folders.txt'):
+
+        with open('podcast_folders.txt', 'r') as f:
+            folder_names = f.read().splitlines()
+
+        folder_names = [folder_name.strip() for folder_name in folder_names]
+        folder_names = [folder_name for folder_name in folder_names if folder_name != ""]
+        folder_names = [folder_name for folder_name in folder_names if folder_name[0] != "#"]
+        
+
+    else:
+        raise ValueError("podcast_folders.txt does not exist. Please and try again.")
+
+
+    # ---- Check if log file exists, if it does, read the log file ----
+    if os.path.exists('transcripton_log.json'):
+        with open('transcripton_log.json', 'r') as f:
+            log = json.load(f)
+    else:
+
+    #otherwise create init log file
+
+        with open('transcripton_log.json', 'w') as f:
+            json.dump("{}", f, indent=4, sort_keys=True)
+        
+        with open('transcripton_log.json', 'r') as f:
+            log = json.load(f)
+
+
+    return folder_names, log
+    
+#------------------------------------------------------------
