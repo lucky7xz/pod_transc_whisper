@@ -194,8 +194,8 @@ def init_model(model_type):
     elif model_type == "base":
         model = model = whisper.load_model("base")
 
-    elif model_type == "medium":
-        model = model = whisper.load_model("medium")
+    elif model_type == "small.en":
+        model = model = whisper.load_model("small.en")
     
     else:
         raise ValueError("model_type must be 'tiny' or 'base' or medium")

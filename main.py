@@ -17,7 +17,7 @@ start again and it should work ?...
 
 # ---- Select the model to use !!! ---
 
-model_type = "tiny" # "tiny", "base" or "medium"
+model_type = "small.en" # "tiny", "base" or "small.en"
 
 # Check if log file exists and if podcast folder file exists, load them
 folder_names, log = check_log_and_podcast_folder_file()
